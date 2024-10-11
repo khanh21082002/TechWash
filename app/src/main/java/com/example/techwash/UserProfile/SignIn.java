@@ -22,20 +22,25 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+
 
 public class SignIn extends AppCompatActivity {
 
-    TextView dangky;
-    TextInputEditText password;
-    EditText email;
-    Button dangnhap;
-    FirebaseAuth mAuth;
-    ProgressDialog progressDialog;
+    private static final String TAG = "EmailPassword";
+
+    private TextView dangky;
+    private TextInputEditText password;
+    private EditText email;
+    private Button dangnhap;
+    private FirebaseAuth mAuth;
+    private ProgressDialog progressDialog;
 
     private void bindingView() {
         email = findViewById(R.id.edt_Email);
@@ -67,89 +72,100 @@ public class SignIn extends AppCompatActivity {
         bindingAction();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Check if user is already signed in
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            updateUI(currentUser);
+        }
+    }
+
     private void checkUser() {
         String strEmail = email.getText().toString().trim();
         String strPassword = password.getText().toString().trim();
 
+        // Kiểm tra đầu vào
+        if (!validateInput(strEmail, strPassword)) return;
+
+        signIn(strEmail, strPassword);
+    }
+
+    private void signIn(String email, String password) {
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success
+                            Log.d(TAG, "signInWithEmail:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            updateUI(user);
+                        } else {
+                            // If sign in fails
+                            Log.w(TAG, "signInWithEmail:failure", task.getException());
+                            Toast.makeText(SignIn.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                            updateUI(null);
+                        }
+                    }
+                });
+        // [END sign_in_with_email]
+    }
+
+    private boolean validateInput(String strEmail, String strPassword) {
         if (strEmail.isEmpty()) {
             email.setError("Vui lòng nhập email!");
             email.requestFocus();
-            return;
+            return false;
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(strEmail).matches()) {
             email.setError("Vui lòng nhập email hợp lệ");
             email.requestFocus();
-            return;
+            return false;
         }
 
         if (strPassword.isEmpty()) {
             password.setError("Vui lòng nhập mật khẩu!");
             password.requestFocus();
-            return;
+            return false;
         }
 
         if (strPassword.length() < 6) {
             password.setError("Mật khẩu phải hơn 6 ký tự!");
             password.requestFocus();
-            return;
+            return false;
         }
+        return true;
+    }
 
-        // Hiển thị thông báo chờ
+    private void showProgressDialog() {
         progressDialog.setMessage("Đang đăng nhập...");
         progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.show();
-
-        mAuth.signInWithEmailAndPassword(strEmail, strPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    user(strEmail);
-                } else {
-                    Toast.makeText(SignIn.this, "Đăng nhập thất bại! Hãy kiểm tra lại thông tin đăng nhập!", Toast.LENGTH_LONG).show();
-                    progressDialog.dismiss();
-                }
-            }
-        });
     }
 
-    private void user(String strEmail) {
-        DatabaseReference database = FirebaseDatabase.getInstance().getReference("User");
-        database.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Boolean exist = false;
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    User user = child.getValue(User.class);
-                    if (user != null) {
-                        Log.d("SignIn", "Kiểm tra người dùng: " + user.getEmail());
-                        if (user.getEmail().equals(strEmail)) {
-                            Log.d("SignIn", "Người dùng tìm thấy: " + user.getEmail());
-                            if (user.getStatus() != null && user.getStatus()) {
-                                exist = true;
-                                break;
-                            } else {
-                                Toast.makeText(SignIn.this, "Tài khoản của bạn đã bị khóa!", Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    }
-                }
-                progressDialog.dismiss();
-                if (exist) {
-                    Log.d("SignIn", "Người dùng hợp lệ, chuyển đến MainScreen.");
-                    startActivity(new Intent(SignIn.this, MainScreen.class));
-                    finish();
-                } else {
-                    Toast.makeText(SignIn.this, "Đăng nhập thất bại! Hãy kiểm tra lại thông tin đăng nhập!", Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("FirebaseData", "Error: " + error.getMessage());
-                progressDialog.dismiss();
-            }
-        });
+    private void dismissProgressDialog() {
+        if (progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 
+    private void showToast(String message) {
+        Toast.makeText(SignIn.this, message, Toast.LENGTH_LONG).show();
+    }
+
+    private void updateUI(FirebaseUser user) {
+        if (user != null) {
+            // Go to MainScreen if the user is logged in
+            Intent intent = new Intent(SignIn.this, MainScreen.class);
+            startActivity(intent);
+            finish();
+        } else {
+            // Handle UI for the case when sign-in fails or the user is null
+            Toast.makeText(this, "User is not signed in", Toast.LENGTH_SHORT).show();
+        }
+    }
 }
