@@ -89,6 +89,9 @@ public class SignIn extends AppCompatActivity {
         // Kiểm tra đầu vào
         if (!validateInput(strEmail, strPassword)) return;
 
+        // Hiển thị thông báo chờ
+        showProgressDialog();
+
         signIn(strEmail, strPassword);
     }
 
@@ -101,17 +104,19 @@ public class SignIn extends AppCompatActivity {
                             // Sign in success
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            dismissProgressDialog();
                             updateUI(user);
                         } else {
                             // If sign in fails
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(SignIn.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignIn.this,
+                                    "Đăng nhập thất bại! Hãy kiểm tra lại thông tin đăng nhập!",
+                                    Toast.LENGTH_LONG).show();
+                            dismissProgressDialog();
                             updateUI(null);
                         }
                     }
                 });
-        // [END sign_in_with_email]
     }
 
     private boolean validateInput(String strEmail, String strPassword) {
