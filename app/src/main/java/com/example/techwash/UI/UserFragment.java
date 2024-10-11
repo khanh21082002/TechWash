@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -31,6 +32,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -129,39 +133,57 @@ public class UserFragment extends Fragment {
     }
 
     private void DisplayProfile() {
+        progressDialog.setMessage("Đang tải thông tin...");
         progressDialog.show();
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        userId = auth.getUid();
-        user = FirebaseAuth.getInstance().getCurrentUser();
-        databaseReference = FirebaseDatabase.getInstance().getReference("User");
-        databaseReference.addValueEventListener(new ValueEventListener() {
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user == null) {
+            Toast.makeText(getActivity(), "Không tìm thấy người dùng!", Toast.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+            return;
+        }
+
+        // Lấy dữ liệu từ Firestore bằng UID thay vì email
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection("User").document(user.getUid());  // Sử dụng UID thay vì email
+
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                User user = snapshot.getValue(User.class);
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    if (child.getKey().equals(userId)) {
-                        user = child.getValue(User.class);
-                        assert user != null;
-                        edt_email.setText(user.getEmail());
-                        edt_phone.setText(user.getPhone());
-                        edt_name.setText(user.getUsername());
-                        if (user.getImage() == "1") {
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        // Lấy dữ liệu từ Firestore và hiển thị
+                        String email = document.getString("email");
+                        String phone = document.getString("phone");
+                        String username = document.getString("username");
+                        String image = document.getString("image");
+
+                        edt_email.setText(email);
+                        edt_phone.setText(phone);
+                        edt_name.setText(username);
+
+                        if (image != null && !image.isEmpty() && !image.equals("1")) {
+                            Picasso.get().load(image).into(profile_image);
+                        } else {
                             Drawable drawable = getResources().getDrawable(R.drawable.avatar);
                             profile_image.setImageDrawable(drawable);
-                        } else {
-                            Picasso.get().load(user.getImage()).into(profile_image);
                         }
+                    } else {
+                        Log.d("FirebaseUserId", "User ID: " + user.getUid());
+                        Toast.makeText(getActivity(), "Không thể tải thông tin người dùng!", Toast.LENGTH_SHORT).show();
                     }
+                } else {
+                    Toast.makeText(getActivity(), "Lỗi khi tải thông tin: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }
                 progressDialog.dismiss();
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
         });
     }
+
+
+
 
     private void updateDate(String username, String phone) {
 

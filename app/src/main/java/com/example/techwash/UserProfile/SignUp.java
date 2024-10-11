@@ -8,6 +8,7 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,9 +34,11 @@ public class SignUp extends AppCompatActivity {
     FirebaseAuth mAuth;
     ProgressDialog progressDialog;
     DatabaseReference databaseReference;
+    FirebaseFirestore firestore;
 
-    private void bingdingView(){
+    private void bingdingView() {
         mAuth = FirebaseAuth.getInstance();
+        firestore = FirebaseFirestore.getInstance();
         edt_Hoten = findViewById(R.id.edt_Hoten);
         edt_Email = findViewById(R.id.edt_Email);
         edt_Sdt = findViewById(R.id.edt_Sdt);
@@ -42,8 +46,10 @@ public class SignUp extends AppCompatActivity {
         edt_Nhaplaipassword = findViewById(R.id.edt_Nhaplaipassword);
         DangKy = findViewById(R.id.btn_Dangky);
         progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Đang tạo tài khoản...");
     }
-    private void bingdingAction(){
+
+    private void bingdingAction() {
         DangKy.setOnClickListener(this::onClickDangKy);
     }
 
@@ -59,6 +65,19 @@ public class SignUp extends AppCompatActivity {
         bingdingAction();
     }
 
+    // Hàm hiển thị ProgressDialog
+    private void showProgressDialog() {
+        if (!progressDialog.isShowing()) {
+            progressDialog.show();
+        }
+    }
+
+    // Hàm ẩn ProgressDialog
+    private void dismissProgressDialog() {
+        if (progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+    }
 
     @SuppressLint("NotConstructor")
     private void DangKy() {
@@ -68,6 +87,7 @@ public class SignUp extends AppCompatActivity {
         String confirmpassword = edt_Nhaplaipassword.getText().toString().trim();
         String phone = edt_Sdt.getText().toString().trim();
 
+        // Kiểm tra tính hợp lệ của các trường nhập
         if (username.isEmpty()) {
             edt_Hoten.setError("Vui lòng nhập họ tên!");
             edt_Hoten.requestFocus();
@@ -80,14 +100,8 @@ public class SignUp extends AppCompatActivity {
             return;
         }
 
-        if (phone.length() > 12) {
-            edt_Sdt.setError("Số điện thoại không hơn 12 ký tự!");
-            edt_Sdt.requestFocus();
-            return;
-        }
-
-        if (phone.length() < 9) {
-            edt_Sdt.setError("Số điện thoại hơn 9 ký tự!");
+        if (phone.length() > 12 || phone.length() < 9) {
+            edt_Sdt.setError("Số điện thoại phải từ 9 đến 12 ký tự!");
             edt_Sdt.requestFocus();
             return;
         }
@@ -127,27 +141,46 @@ public class SignUp extends AppCompatActivity {
             edt_Nhaplaipassword.requestFocus();
             return;
         }
-        progressDialog.show();
+
+        // Hiển thị ProgressDialog
+        showProgressDialog();
+
+        // Đăng ký tài khoản với Firebase Authentication
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            databaseReference = FirebaseDatabase.getInstance().getReference("User");
+                            // Lấy UID của người dùng hiện tại
+                            String userId = mAuth.getCurrentUser().getUid();
+
+                            // Tạo dữ liệu người dùng
                             Map<String, Object> user = new HashMap<>();
                             user.put("email", email);
                             user.put("username", username);
                             user.put("phone", phone);
-                            user.put("status" ,true);
-                            user.put("image" , "1");
-                            databaseReference.child(mAuth.getCurrentUser().getUid()).setValue(user);
-                            Toast.makeText(SignUp.this, "Tạo tài khoản thành công.", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(SignUp.this, SignIn.class));
-                            finishAffinity();
+                            user.put("status", true);
+                            user.put("image", "1");
+
+                            // Lưu thông tin người dùng vào Firestore
+                            firestore.collection("User").document(userId).set(user)
+                                    .addOnSuccessListener(aVoid -> {
+                                        Log.d("Firestore", "Lưu dữ liệu thành công");
+                                        Toast.makeText(SignUp.this, "Lưu vào Firestore thành công", Toast.LENGTH_SHORT).show();
+                                        dismissProgressDialog();  // Tắt ProgressDialog khi lưu thành công
+                                        startActivity(new Intent(SignUp.this, SignIn.class));
+                                        finishAffinity();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("Firestore", "Lỗi khi lưu dữ liệu: " + e.getMessage());
+                                        Toast.makeText(SignUp.this, "Lỗi khi lưu vào Firestore", Toast.LENGTH_SHORT).show();
+                                        dismissProgressDialog();  // Tắt ProgressDialog khi gặp lỗi
+                                    });
                         } else {
-                            Toast.makeText(SignUp.this, "Tạo tài khoản thất bại.", Toast.LENGTH_SHORT).show();
-                            progressDialog.dismiss();
+                            // Hiển thị thông báo lỗi từ Firebase
+                            String errorMessage = task.getException() != null ? task.getException().getMessage() : "Tạo tài khoản thất bại.";
+                            Toast.makeText(SignUp.this, errorMessage, Toast.LENGTH_SHORT).show();
+                            dismissProgressDialog();  // Tắt ProgressDialog khi gặp lỗi
                         }
                     }
                 });
