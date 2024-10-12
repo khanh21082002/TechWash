@@ -38,6 +38,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -90,11 +91,27 @@ public class UserFragment extends Fragment {
         btn_save.setOnClickListener(view14 -> {
             String username = Objects.requireNonNull(edt_name.getText()).toString();
             String phone = Objects.requireNonNull(edt_phone.getText()).toString();
+
+            // Kiểm tra tính hợp lệ của các trường trước khi lưu
+            if (username.trim().isEmpty()) {
+                edt_name.setError("Họ tên không được để trống");
+                edt_name.requestFocus();
+                return;  // Dừng quá trình nếu tên không hợp lệ, giữ lại nút "Save"
+            }
+
+            if (phone.length() != 10) {
+                edt_phone.setError("Số điện thoại không đúng định dạng!");
+                edt_phone.requestFocus();
+                return;  // Dừng quá trình nếu số điện thoại không hợp lệ, giữ lại nút "Save"
+            }
+
+            // Nếu cả hai trường hợp hợp lệ thì cập nhật và ẩn nút "Save"
             updateDate(username, phone);
             btn_save.setVisibility(View.INVISIBLE);
             edt_name.setEnabled(false);
             edt_phone.setEnabled(false);
         });
+
 
         btn_logout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -183,35 +200,34 @@ public class UserFragment extends Fragment {
     }
 
 
-
-
     private void updateDate(String username, String phone) {
 
-        if (edt_name.getText().toString().trim().isEmpty()) {
-            edt_name.setError("Họ tên không được để trống");
-            edt_name.requestFocus();
-            return;
-        }
-
-        if (edt_phone.getText().toString().length() != 10) {
-            edt_phone.setError("Số điện thoại không đúng định dạng!");
-            edt_phone.requestFocus();
-            return;
-        }
-
-        HashMap User = new HashMap<>();
+        // Lấy người dùng hiện tại
         user = FirebaseAuth.getInstance().getCurrentUser();
-        User.put("username", username);
-        User.put("phone", phone);
+        if (user == null) {
+            Toast.makeText(getActivity(), "Không tìm thấy người dùng!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        databaseReference = FirebaseDatabase.getInstance().getReference("User");
-        databaseReference.child(userId).updateChildren(User).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(getActivity(), "Cập nhập thông tin thành công!", Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+        // Tạo bản đồ dữ liệu để cập nhật
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("username", username);
+        userData.put("phone", phone);
+
+        // Cập nhật thông tin vào Firestore
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("User").document(user.getUid())  // Sử dụng UID của người dùng
+                .update(userData)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(getActivity(), "Cập nhật thông tin thành công!", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(getActivity(), "Cập nhật thông tin thất bại: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
     }
+
 }

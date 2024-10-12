@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -37,6 +38,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -161,8 +163,8 @@ public class EditProfilePage extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(EditProfilePage.this, "Failed to load profile image", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -259,16 +261,24 @@ public class EditProfilePage extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == IMAGEPICK_GALLERY_REQUEST && data != null) {
-                imageuri = data.getData();
+                imageuri = data.getData();  // Lấy ảnh từ thư viện
+                // Hiển thị ảnh trực tiếp
+                Picasso.get().load(imageuri).into(circleImageView);
+                // Tải ảnh lên Firebase Storage
                 uploadProfileCoverPhoto(imageuri);
             }
             if (requestCode == IMAGE_PICKCAMERA_REQUEST) {
+                // Hiển thị ảnh trực tiếp từ camera
+                Picasso.get().load(imageuri).into(circleImageView);
+                // Tải ảnh lên Firebase Storage
                 uploadProfileCoverPhoto(imageuri);
             }
         }
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -304,13 +314,15 @@ public class EditProfilePage extends AppCompatActivity {
     // Here we will click a photo and then go to startactivityforresult for updating data
     private void pickFromCamera() {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MediaStore.Images.Media.TITLE, "Temp_pic");
+        contentValues.put(MediaStore.Images.Media.TITLE, "Temp Image");
         contentValues.put(MediaStore.Images.Media.DESCRIPTION, "Temp Description");
-        imageuri = this.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-        Intent camerIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        camerIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageuri);
-        startActivityForResult(camerIntent, IMAGE_PICKCAMERA_REQUEST);
+        imageuri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageuri);  // Đặt ảnh đã chụp vào Uri tạm thời
+        startActivityForResult(cameraIntent, IMAGE_PICKCAMERA_REQUEST);  // Mã yêu cầu camera
     }
+
 
     // We will select an image from gallery
     private void pickFromGallery() {
@@ -321,50 +333,59 @@ public class EditProfilePage extends AppCompatActivity {
 
     // We will upload the image from here.
     private void uploadProfileCoverPhoto(final Uri uri) {
+        Log.d("FirebaseUID", "User ID: " + firebaseUser.getUid());
         pd.show();
 
-        // We are taking the filepath as storagepath + firebaseauth.getUid()+".png"
-        String filepathname = storagepath + "" + profileOrCoverPhoto + "_" + firebaseUser.getUid();
+        // Đường dẫn ảnh trên Firebase Storage
+        String filepathname = "avatars/" + firebaseUser.getUid() + ".png";  // Lưu avatar theo UID của người dùng
         StorageReference storageReference1 = storageReference.child(filepathname);
+
         storageReference1.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
-                while (!uriTask.isSuccessful()) ;
+                while (!uriTask.isSuccessful());
 
-                // We will get the url of our image using uritask
+                // Nhận URL tải xuống của ảnh
                 final Uri downloadUri = uriTask.getResult();
                 if (uriTask.isSuccessful()) {
-
-                    // updating our image url into the realtime database
+                    // Cập nhật URL ảnh vào Firestore
                     HashMap<String, Object> hashMap = new HashMap<>();
                     hashMap.put(profileOrCoverPhoto, downloadUri.toString());
-                    databaseReference.child(firebaseUser.getUid()).updateChildren(hashMap).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            pd.dismiss();
-                            Toast.makeText(EditProfilePage.this, "Updated", Toast.LENGTH_LONG).show();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            pd.dismiss();
-                            Toast.makeText(EditProfilePage.this, "Error Updating ", Toast.LENGTH_LONG).show();
-                        }
-                    });
+
+                    FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+                    firestore.collection("User").document(firebaseUser.getUid())
+                            .update(hashMap)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    pd.dismiss();
+                                    Toast.makeText(EditProfilePage.this, "Profile image updated successfully", Toast.LENGTH_LONG).show();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    pd.dismiss();
+                                    Toast.makeText(EditProfilePage.this, "Failed to update image in Firestore: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            });
                 } else {
                     pd.dismiss();
-                    Toast.makeText(EditProfilePage.this, "Error", Toast.LENGTH_LONG).show();
+                    Toast.makeText(EditProfilePage.this, "Failed to get download URL", Toast.LENGTH_LONG).show();
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 pd.dismiss();
-                Toast.makeText(EditProfilePage.this, "Error uri", Toast.LENGTH_LONG).show();
+                // Hiển thị thông báo lỗi chi tiết
+                Toast.makeText(EditProfilePage.this, "Error uploading image: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
+
+
 
 
     private void initUI() {
