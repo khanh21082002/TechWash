@@ -25,7 +25,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.techwash.Adapter.RoomAdapter;
+import com.example.techwash.Adapter.AutoAdapter;
 import com.example.techwash.Model.Auto;
 import com.example.techwash.R;
 import com.google.firebase.database.DataSnapshot;
@@ -34,6 +34,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,14 +43,9 @@ import java.util.List;
 public class SearchFragment extends Fragment {
     private List<Auto> list;
     private RecyclerView recyclerView;
-    private RoomAdapter roomAdapter;
+    private AutoAdapter autoAdapter;
     private SearchView searchView;
     private Toolbar toolbar;
-    private String[] districts = {
-            "Quận 1", "Quận 2", "Quận 3", "Quận 4",
-            "Quận 5", "Quận 6", "Quận 7", "Quận 8",
-            "Quận 9", "Quận 10", "Quận 11", "Quận 12"
-    };
     private DatabaseReference reference;
 
     @Override
@@ -60,12 +57,23 @@ public class SearchFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
+
+        // Khởi tạo UI và RecyclerView
         initializeUI(view);
         setupToolbar();
         setupRecyclerView();
+
+        // Khởi tạo adapter với danh sách rỗng ban đầu
+        autoAdapter = new AutoAdapter(new ArrayList<>());
+        recyclerView.setAdapter(autoAdapter); // Gán adapter ngay khi khởi tạo
+
+        // Tải dữ liệu từ Firebase
         loadAutoList();
+
         return view;
     }
+
+
 
     private void initializeUI(View view) {
         recyclerView = view.findViewById(R.id.Rcv);
@@ -89,61 +97,42 @@ public class SearchFragment extends Fragment {
     }
 
     private void loadAutoList() {
-        reference = FirebaseDatabase.getInstance().getReference("TPHCM");
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                list.clear();
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    Auto auto = child.getValue(Auto.class);
-                    if (auto != null && auto.isTrangthai()) {
-                        list.add(auto);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("Auto")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        List<Auto> autoList = new ArrayList<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Auto auto = document.toObject(Auto.class);
+                            auto.setAutoId(document.getId());
+                            // Ghi log để kiểm tra giá trị từng trường
+                            Log.d("FirebaseData", "AutoName: " + auto.getAutoName());
+                            Log.d("FirebaseData", "ImageAuto: " + auto.getImageAuto());
+                            autoList.add(auto);
+                        }
+                        autoAdapter.updateData(autoList);
+                    } else {
+                        Log.w("FirebaseData", "Lỗi khi lấy dữ liệu.", task.getException());
                     }
-                }
-                updateRecyclerView();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Khong the lay du lieu!", Toast.LENGTH_SHORT).show();
-            }
-        });
+                });
     }
 
+
+
+
+
+
     private void updateRecyclerView() {
-        if (roomAdapter == null) {
-            roomAdapter = new RoomAdapter(list);
-            recyclerView.setAdapter(roomAdapter);
+        if (autoAdapter == null) {
+            autoAdapter = new AutoAdapter(list);
+            recyclerView.setAdapter(autoAdapter);
         } else {
-            roomAdapter.notifyDataSetChanged();
+            autoAdapter.notifyDataSetChanged();
         }
     }
 
-    private void sortList(boolean highToLow) {
-        Query query = reference.orderByChild("gia");
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                list.clear();
-                for (DataSnapshot child : snapshot.getChildren()) {
-                    Auto auto = child.getValue(Auto.class);
-                    if (auto != null) {
-                        if (highToLow) {
-                            list.add(0, auto);
-                        } else {
-                            list.add(auto);
-                        }
-                    }
-                }
-                updateRecyclerView();
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(getContext(), "Khong the lay du lieu!", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
@@ -167,40 +156,10 @@ public class SearchFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                roomAdapter.getFilter().filter(newText);
+                //autoAdapter.getFilter().filter(newText);
                 return false;
             }
         });
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        Log.d("SearchFragment", "Selected item ID: " + id);
-        switch (id) {
-//            case R.id.menu_hightolow:
-//                sortList(true);
-//                return true;
-//            case R.id.menu_lowtohigh:
-//                sortList(false);
-//                return true;
-//            case R.id.menu_fillerQuan:
-//                showDistrictDialog();
-//                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void showDistrictDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Chọn quận muốn tìm");
-        builder.setItems(districts, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                searchView.setQuery(districts[which], true);
-            }
-        });
-        builder.create().show();
-    }
 }

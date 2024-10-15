@@ -3,140 +3,80 @@ package com.example.techwash.Model;
 import java.io.Serializable;
 
 public class Auto implements Serializable {
-    String hinh;
-    String tenauto;
-    String diachi;
-    String gia;
-    String gia2;
-    String hinh2;
-    String hinh3;
-    String slphongdon;
-    String hinh4;
-    String diachiCT;
-    String mota;
-    String Sdtks;
-    boolean trangthai;
+    private String autoId;
+    private String AutoName;
+    private String Address;
+    private String ImageAuto;
+    private int Price;
+    private float Rating;
+    private String userId;
 
-    public Auto() {
+    public Auto(){}
+
+    public Auto(String autoId, String autoName, String address, String imageAuto, int price, float rating, String userId) {
+        this.autoId = autoId;
+        AutoName = autoName;
+        Address = address;
+        ImageAuto = imageAuto;
+        Price = price;
+        Rating = rating;
+        this.userId = userId;
     }
 
-    public Auto(String hinh, String tenauto, String diachi, String gia, String hinh2, String hinh3, String hinh4, String diachiCT, String mota, String slphongdon, String Sdtks, boolean trangthai, String gia2) {
-        this.hinh = hinh;
-        this.tenauto = tenauto;
-        this.diachi = diachi;
-        this.gia = gia;
-        this.hinh2 = hinh2;
-        this.hinh3 = hinh3;
-        this.hinh4 = hinh4;
-        this.diachiCT = diachiCT;
-        this.mota = mota;
-        this.slphongdon = slphongdon;
-        this.Sdtks = Sdtks;
-        this.trangthai = trangthai;
-        this.gia2 = gia2;
+    public String getAutoName() {
+        return AutoName;
     }
 
-    public String getGia2() {
-        return gia2;
+    public void setAutoName(String autoName) {
+        AutoName = autoName;
     }
 
-    public void setGia2(String gia2) {
-        this.gia2 = gia2;
+    public String getAddress() {
+        return Address;
     }
 
-    public boolean isTrangthai() {
-        return trangthai;
+    public void setAddress(String address) {
+        Address = address;
     }
 
-    public void setTrangthai(boolean trangthai) {
-        this.trangthai = trangthai;
+    public String getImageAuto() {
+        return ImageAuto;
     }
 
-    public String getSdtks() {
-        return Sdtks;
+    public void setImageAuto(String imageAuto) {
+        ImageAuto = imageAuto;
     }
 
-    public void setSdtks(String sdtks) {
-        Sdtks = sdtks;
+    public int getPrice() {
+        return Price;
     }
 
-    public String getSlphongdon() {
-        return slphongdon;
+    public void setPrice(int price) {
+        Price = price;
     }
 
-    public void setSlphongdon(String slphongdon) {
-        this.slphongdon = slphongdon;
+    public float getRating() {
+        return Rating;
     }
 
-    public String getHinh() {
-        return hinh;
+    public void setRating(float rating) {
+        Rating = rating;
     }
 
-    public void setHinh(String hinh) {
-        this.hinh = hinh;
+    public String getUserId() {
+        return userId;
     }
 
-    public String getTenks() {
-        return tenauto;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public void setTenks(String tenks) {
-        this.tenauto = tenks;
+    // Getter và Setter cho autoId
+    public String getAutoId() {
+        return autoId;
     }
 
-    public String getDiachi() {
-        return diachi;
-    }
-
-    public void setDiachi(String diachi) {
-        this.diachi = diachi;
-    }
-
-    public String getGia() {
-        return gia;
-    }
-
-    public void setGia(String gia) {
-        this.gia = gia;
-    }
-
-    public String getHinh2() {
-        return hinh2;
-    }
-
-    public void setHinh2(String hinh2) {
-        this.hinh2 = hinh2;
-    }
-
-    public String getHinh3() {
-        return hinh3;
-    }
-
-    public void setHinh3(String hinh3) {
-        this.hinh3 = hinh3;
-    }
-
-    public String getHinh4() {
-        return hinh4;
-    }
-
-    public void setHinh4(String hinh4) {
-        this.hinh4 = hinh4;
-    }
-
-    public String getDiachiCT() {
-        return diachiCT;
-    }
-
-    public void setDiachiCT(String diachiCT) {
-        this.diachiCT = diachiCT;
-    }
-
-    public String getMota() {
-        return mota;
-    }
-
-    public void setMota(String mota) {
-        this.mota = mota;
+    public void setAutoId(String autoId) {
+        this.autoId = autoId;
     }
 }

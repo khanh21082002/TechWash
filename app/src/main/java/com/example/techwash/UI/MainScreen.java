@@ -16,7 +16,7 @@ public class MainScreen extends AppCompatActivity {
 
     private BottomNavigationView bottomNavigationView;
     private final SearchFragment searchFragment = new SearchFragment();
-    private final FavoriteFragment favoriteFragment = new FavoriteFragment();
+    //private final FavoriteFragment favoriteFragment = new FavoriteFragment();
     private final BookFragment bookFragment = new BookFragment();
     private final UserFragment userFragment = new UserFragment();
 
@@ -49,7 +49,7 @@ public class MainScreen extends AppCompatActivity {
                         switchFragment(searchFragment);
                         return true;
                     case R.id.menu_favorite:
-                        switchFragment(favoriteFragment);
+                        //switchFragment(favoriteFragment);
                         return true;
                     case R.id.menu_book:
                         switchFragment(bookFragment);

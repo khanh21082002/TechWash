@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:elevation="6dp"
+    app:cardBackgroundColor="@color/gray"
+    app:cardCornerRadius="8dp"
+    app:cardUseCompatPadding="true">
+
+    <RelativeLayout
+        android:id="@+id/ln_linear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <!-- Ảnh đại diện Gara -->
+        <ImageView
+            android:id="@+id/img1"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_baseline_image_24" />
+
+        <!-- Tên Gara -->
+        <TextView
+            android:id="@+id/garage_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:layout_toRightOf="@id/img1"
+            android:text="Tên Gara"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+        <!-- favorite -->
+
+        <!-- Đánh giá bằng RatingBar -->
+        <ImageView
+            android:id="@+id/favorite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="125dp"
+            android:layout_marginTop="10dp"
+            android:layout_toRightOf="@+id/garage_name"
+            android:src="@drawable/ic_baseline_favorite_24_white" />
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            style="@style/Widget.AppCompat.RatingBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/garage_name"
+            android:layout_marginTop="6dp"
+            android:layout_toRightOf="@id/img1"
+            android:rating="4.5"
+            android:stepSize="0.5"
+            android:numStars="5" />
+
+        <!-- Địa chỉ Gara -->
+        <TextView
+            android:id="@+id/garage_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ratingBar"
+            android:layout_marginTop="6dp"
+            android:layout_toRightOf="@id/img1"
+            android:drawableStart="@drawable/ic_outline_location_on_24"
+            android:drawablePadding="8dp"
+            android:text="123 Đường ABC, TP. HCM"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="16sp" />
+
+        <!-- Giá dịch vụ -->
+        <TextView
+            android:id="@+id/garage_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/garage_address"
+            android:layout_marginTop="6dp"
+            android:layout_toRightOf="@id/img1"
+            android:drawableStart="@drawable/ic_outline_account_balance_wallet_24"
+            android:drawablePadding="8dp"
+            android:text="Giá: 100,000 VND"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- Nút Xem Khung Giờ -->
+        <Button
+            android:id="@+id/btn_view_timeslots"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/garage_price"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_alignParentEnd="true"
+            android:text="Đặt lịch"
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/blue" />
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>
+
+
