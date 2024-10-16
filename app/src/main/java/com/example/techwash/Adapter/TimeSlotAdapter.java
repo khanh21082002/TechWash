@@ -44,23 +44,24 @@ public class TimeSlotAdapter extends RecyclerView.Adapter<TimeSlotAdapter.TimeSl
         holder.time.setText(timeSlot.getStartTime() + " - " + timeSlot.getEndTime());
         holder.status.setText(timeSlot.getStatus().name());
 
-
         if (timeSlot.getStatus() == TimeSlot.SlotStatus.BOOKED) {
-            holder.btnDatLich.setEnabled(false); // Vô hiệu hóa nút nếu đã được đặt
-            holder.btnDatLich.setText("Đã Đặt");
-            holder.status.setText("BOOKED");
+            // Ẩn nút nếu đã được đặt
+            holder.btnDatLich.setVisibility(View.GONE);
+            holder.trangthai.setText("Lich Đã Bị Đặt"); // Hiển thị trạng thái "Đã Đặt"
         } else {
-            holder.btnDatLich.setEnabled(true); // Cho phép đặt lịch nếu AVAILABLE
-        }
+            // Hiển thị nút nếu slot còn trống
+            holder.btnDatLich.setVisibility(View.VISIBLE);
+            holder.btnDatLich.setText("Đặt Lịch");
+            holder.btnDatLich.setEnabled(true); // Cho phép đặt lịch
 
-
+            // Thiết lập sự kiện click cho nút
             holder.btnDatLich.setOnClickListener(v -> {
-                updateSlotStatus(timeSlot.getId(), TimeSlot.SlotStatus.BOOKED);  // Truyền slotId chính xác
-                Log.e("TimeSlotAdapter", timeSlot.getId());
+                updateSlotStatus(timeSlot.getId(), TimeSlot.SlotStatus.BOOKED); // Cập nhật trạng thái
             });
-
-
+        }
     }
+
+
 
     private void updateSlotStatus(String slotId, TimeSlot.SlotStatus newStatus) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -93,7 +94,7 @@ public class TimeSlotAdapter extends RecyclerView.Adapter<TimeSlotAdapter.TimeSl
     }
 
     public static class TimeSlotViewHolder extends RecyclerView.ViewHolder {
-        TextView time, status;
+        TextView time, status, trangthai;
         Button btnDatLich;
 
         public TimeSlotViewHolder(@NonNull View itemView) {
@@ -101,6 +102,7 @@ public class TimeSlotAdapter extends RecyclerView.Adapter<TimeSlotAdapter.TimeSl
             time = itemView.findViewById(R.id.time);
             status = itemView.findViewById(R.id.status);
             btnDatLich = itemView.findViewById(R.id.btn_datlich);
+            trangthai = itemView.findViewById(R.id.trangthai);
         }
     }
 }
