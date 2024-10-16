@@ -17,7 +17,7 @@ public class MainScreen extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private final SearchFragment searchFragment = new SearchFragment();
     //private final FavoriteFragment favoriteFragment = new FavoriteFragment();
-    private final BookFragment bookFragment = new BookFragment();
+    private final BookedFragment bookFragment = new BookedFragment();
     private final UserFragment userFragment = new UserFragment();
 
     @Override
