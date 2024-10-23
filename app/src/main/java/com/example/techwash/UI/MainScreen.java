@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.example.techwash.Notification.NotificationService;
 import com.example.techwash.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
@@ -28,6 +29,7 @@ public class MainScreen extends AppCompatActivity {
         bindViews();
         setInitialFragment();
         setupBottomNavigation();
+
     }
 
     private void bindViews() {

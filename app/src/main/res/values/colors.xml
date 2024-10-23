@@ -12,4 +12,11 @@
     <color name="dark_blue">#000A45</color>
     <color name="gray">#80000000</color>
     <color name="red">#D32F2F</color>
+    <color name="prime_dark">#212121</color>
+    <color name="accent">#FFC107</color>
+    <color name="card_light">#F5F5F5</color>
+    <color name="text_dark">#424242</color>
+    <color name="primary">#3F51B5</color>
+    <color name="primaryDark">#303F9F</color>
+    <color name="colorPrimary">#2196F3</color>
 </resources>

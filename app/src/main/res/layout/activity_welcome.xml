@@ -3,19 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C1C1C"
+    android:background="@color/white"
+    android:orientation="vertical"
     android:gravity="center"
     tools:context=".Welcome">
 
-    <TextView
-        android:id="@+id/hinhnen"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-medium"
-        android:gravity="center"
-        android:text="TechWash Auto"
-        android:textColor="@color/white"
-        android:textSize="60dp"
-        android:textStyle="bold" />
-
+    <!-- Thêm logo của ứng dụng -->
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:src="@drawable/your_logo"
+        android:contentDescription="Logo của ứng dụng"
+        android:layout_marginBottom="20dp" />
 </LinearLayout>

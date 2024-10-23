@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.techwash.Model.Auto;
 import com.example.techwash.Model.Booked;
 import com.example.techwash.Model.TimeSlot;
+import com.example.techwash.Notification.NotificationService;
 import com.example.techwash.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -107,12 +108,12 @@ public class TimeSlotAdapter extends RecyclerView.Adapter<TimeSlotAdapter.TimeSl
 
         String userId = user.getUid(); // Lấy userId từ Firebase Authentication
         TimeSlot timeSlot = getTimeSlotById(slotId); // Tìm slot theo ID
-
+        NotificationService.saveFCMToken(userId);
         if (timeSlot == null) {
             Toast.makeText(context, "Không tìm thấy lịch!", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        NotificationService.sendNotification(timeSlot.getUserId());
         // Tạo đối tượng Booked với thông tin cần thiết
         Booked booked = new Booked(timeSlot.getAutoId(), userId, slotId);
 

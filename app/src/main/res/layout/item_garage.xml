@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:elevation="6dp"
-    app:cardBackgroundColor="@color/gray"
+    app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="8dp"
     app:cardUseCompatPadding="true">
 
@@ -34,7 +34,7 @@
             android:layout_marginLeft="12dp"
             android:layout_toRightOf="@id/img1"
             android:text="Tên Gara"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="22sp"
             android:textStyle="bold" />
         <!-- favorite -->
@@ -72,7 +72,7 @@
             android:drawableStart="@drawable/ic_outline_location_on_24"
             android:drawablePadding="8dp"
             android:text="123 Đường ABC, TP. HCM"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@android:color/black"
             android:textSize="16sp" />
 
         <!-- Giá dịch vụ -->
@@ -86,7 +86,7 @@
             android:drawableStart="@drawable/ic_outline_account_balance_wallet_24"
             android:drawablePadding="8dp"
             android:text="Giá: 100,000 VND"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold" />
 

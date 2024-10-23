@@ -1,11 +1,15 @@
 plugins {
-    alias(libs.plugins.android.application);
-    id("com.google.gms.google-services") version "4.3.15"
+    id("com.android.application") version "8.5.1"
+    id("com.google.gms.google-services") version "4.4.2"
 }
 
 android {
     namespace = "com.example.techwash"
     compileSdk = 34
+
+    packagingOptions {
+        exclude("META-INF/DEPENDENCIES")
+    }
 
     defaultConfig {
         applicationId = "com.example.techwash"
@@ -34,6 +38,7 @@ android {
 
 dependencies {
 
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -43,18 +48,22 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.3.0")
+
     implementation ("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
 
 
-    //firebase
-
-    implementation("com.google.firebase:firebase-database:19.2.1")
-    implementation("com.google.firebase:firebase-firestore:24.3.1")
-    implementation("com.google.firebase:firebase-auth:21.0.8")
-    implementation("com.google.firebase:firebase-storage:20.0.2")
-    implementation(platform("com.google.firebase:firebase-bom:26.3.0"))
+    // Sử dụng Firebase BOM để quản lý phiên bản
+    implementation(platform("com.google.firebase:firebase-bom:31.2.3")) // Cập nhật lên phiên bản mới nhất
+    implementation ("com.google.firebase:firebase-messaging:23.1.0")
+    // Firebase
+    implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
+
+    // Các phụ thuộc khác...
     implementation("androidx.navigation:navigation-fragment:2.4.2")
     implementation("androidx.navigation:navigation-ui:2.4.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
@@ -65,9 +74,13 @@ dependencies {
         exclude(module = "support-annotations")
     }
 
-    //google service
-    implementation ("com.google.android.gms:play-services-maps:18.0.2")
-    implementation ("com.google.android.gms:play-services-places:17.0.0")
-    implementation ("com.google.android.gms:play-services-location:19.0.1")
-    implementation ("kr.co.prnd:readmore-textview:1.0.0")
+    // Google Service
+    implementation("com.google.android.gms:play-services-maps:18.0.2")
+    implementation("com.google.android.gms:play-services-places:17.0.0")
+    implementation("com.google.android.gms:play-services-location:19.0.1")
+
+    // Thư viện khác
+    implementation("kr.co.prnd:readmore-textview:1.0.0")
+    implementation("com.apachat:swipereveallayout-android:1.1.2")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }

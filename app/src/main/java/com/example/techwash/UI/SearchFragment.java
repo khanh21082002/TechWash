@@ -1,39 +1,25 @@
 package com.example.techwash.UI;
 
-import android.app.SearchManager;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.SearchView;
-import android.widget.Toast;
+import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.techwash.Adapter.AutoAdapter;
+import com.example.techwash.Adapter.NewsAdapter;
 import com.example.techwash.Model.Auto;
+import com.example.techwash.Model.News;
 import com.example.techwash.R;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -41,59 +27,59 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SearchFragment extends Fragment {
-    private List<Auto> list;
-    private RecyclerView recyclerView;
-    private AutoAdapter autoAdapter;
-    private SearchView searchView;
-    private Toolbar toolbar;
-    private DatabaseReference reference;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
+    private RecyclerView recyclerView, newsRecyclerView;
+    private AutoAdapter autoAdapter;
+    private NewsAdapter newsAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
-        // Khởi tạo UI và RecyclerView
         initializeUI(view);
-        setupToolbar();
         setupRecyclerView();
 
-        // Khởi tạo adapter với danh sách rỗng ban đầu
         autoAdapter = new AutoAdapter(new ArrayList<>());
-        recyclerView.setAdapter(autoAdapter); // Gán adapter ngay khi khởi tạo
+        recyclerView.setAdapter(autoAdapter);
 
-        // Tải dữ liệu từ Firebase
+        newsAdapter = new NewsAdapter(getContext(), new ArrayList<>());
+        newsRecyclerView.setAdapter(newsAdapter);
+
         loadAutoList();
+        loadNewsList();
+
+        // Gọi setUserGreeting với view đã khởi tạo
+        setUserGreeting(view);
 
         return view;
     }
 
-
-
-    private void initializeUI(View view) {
-        recyclerView = view.findViewById(R.id.Rcv);
-        toolbar = view.findViewById(R.id.toolbar);
-        list = new ArrayList<>();
-    }
-
-    private void setupToolbar() {
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        if (activity != null) {
-            activity.setSupportActionBar(toolbar);
-            activity.getSupportActionBar().setTitle("");
-            toolbar.setOverflowIcon(ContextCompat.getDrawable(activity, R.drawable.ic_baseline_sort_24));
+    private void setUserGreeting(View view) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String displayName = currentUser.getDisplayName();
+            if (displayName != null) {
+                // Cập nhật TextView với tên người dùng
+                TextView greetingTextView = view.findViewById(R.id.tv_greeting);
+                greetingTextView.setText("Xin chào mừng " + displayName + ", bạn đến với TechWash!");
+            }
         }
     }
 
+    private void initializeUI(View view) {
+        recyclerView = view.findViewById(R.id.Rcv);
+        newsRecyclerView = view.findViewById(R.id.recycler_news);
+    }
+
     private void setupRecyclerView() {
+        // Setup RecyclerView cho Auto
         DividerItemDecoration divider = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(divider);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // Setup RecyclerView cho tin tức với GridLayoutManager để hiện 2 card trên mỗi hàng
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        newsRecyclerView.setLayoutManager(gridLayoutManager);
     }
 
     private void loadAutoList() {
@@ -106,60 +92,23 @@ public class SearchFragment extends Fragment {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Auto auto = document.toObject(Auto.class);
                             auto.setAutoId(document.getId());
-                            // Ghi log để kiểm tra giá trị từng trường
-                            Log.d("FirebaseData", "AutoName: " + auto.getAutoName());
-                            Log.d("FirebaseData", "ImageAuto: " + auto.getImageAuto());
                             autoList.add(auto);
                         }
                         autoAdapter.updateData(autoList);
                     } else {
-                        Log.w("FirebaseData", "Lỗi khi lấy dữ liệu.", task.getException());
+                        Log.w("FirebaseData", "Lỗi khi lấy dữ liệu Auto.", task.getException());
                     }
                 });
     }
 
+    private void loadNewsList() {
+        List<News> newsList = new ArrayList<>();
+        newsList.add(new News("Khuyến mãi rửa xe 50%", "Giảm giá dịch vụ rửa xe nhanh cho các khách hàng mới", "https://binhphuongcars.com/wp-content/uploads/2023/06/354039041_130587333380318_1371513820585816466_n.jpeg"));
+        newsList.add(new News("Giới thiệu dịch vụ mới", "Dịch vụ vệ sinh nội thất xe hơi ra mắt", "https://thanhphongauto.com/wp-content/uploads/2022/10/ra-mat-dich-vu-ru-xe-tu-dong-tai-thanh-phong.jpg"));
+        newsList.add(new News("Bảo dưỡng định kỳ", "Giảm giá 20% cho các dịch vụ bảo dưỡng định kỳ", "https://autowash.vn/wp-content/uploads/2020/02/FB-AD-02.jpg"));
+        newsList.add(new News("Sự kiện giáng sinh", "Sự kiện giáng sinh sẽ có nhiều ưu đãi mới", "https://riversidepalace.vn/multidata/thiep-chuc-giang-sinh_092358931-20.jpg"));
+        Log.d("NewsList", "Số lượng tin tức: " + newsList.size());
 
-
-
-
-
-    private void updateRecyclerView() {
-        if (autoAdapter == null) {
-            autoAdapter = new AutoAdapter(list);
-            recyclerView.setAdapter(autoAdapter);
-        } else {
-            autoAdapter.notifyDataSetChanged();
-        }
+        newsAdapter.updateData(newsList);
     }
-
-
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_item, menu);
-        setupSearch(menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    private void setupSearch(Menu menu) {
-        MenuItem menuItem = menu.findItem(R.id.menu_search);
-        searchView = (SearchView) MenuItemCompat.getActionView(menuItem);
-        searchView.setIconified(true);
-        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
-        searchView.setQueryHint("Tìm kiếm...");
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                //autoAdapter.getFilter().filter(newText);
-                return false;
-            }
-        });
-    }
-
 }
