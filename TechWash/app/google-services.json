@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1067106992738",
+    "project_id": "techwash-56d5a",
+    "storage_bucket": "techwash-56d5a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1067106992738:android:15d052089a52ec9bcf073b",
+        "android_client_info": {
+          "package_name": "com.example.techwash"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6_u8gVFlmW4zKvnOyAET0IpsdMn84VWo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

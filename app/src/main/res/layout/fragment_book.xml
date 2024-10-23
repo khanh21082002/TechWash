@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
-            android:text="Hiện bạn đang không có chuyến đi nào"
+            android:text="Hiện bạn đang không có lịch đặt nào"
             android:textColor="@color/white"
             android:textSize="30dp"
             android:textStyle="bold"

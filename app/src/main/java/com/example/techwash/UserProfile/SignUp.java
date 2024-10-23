@@ -88,59 +88,59 @@ public class SignUp extends AppCompatActivity {
         String phone = edt_Sdt.getText().toString().trim();
 
         // Kiểm tra tính hợp lệ của các trường nhập
-        if (username.isEmpty()) {
-            edt_Hoten.setError("Vui lòng nhập họ tên!");
-            edt_Hoten.requestFocus();
-            return;
-        }
+            if (username.isEmpty()) {
+                edt_Hoten.setError("Vui lòng nhập họ tên!");
+                edt_Hoten.requestFocus();
+                return;
+            }
 
-        if (phone.isEmpty()) {
-            edt_Sdt.setError("Vui lòng nhập số điện thoại");
-            edt_Sdt.requestFocus();
-            return;
-        }
+            if (phone.isEmpty()) {
+                edt_Sdt.setError("Vui lòng nhập số điện thoại");
+                edt_Sdt.requestFocus();
+                return;
+            }
 
-        if (phone.length() > 12 || phone.length() < 9) {
-            edt_Sdt.setError("Số điện thoại phải từ 9 đến 12 ký tự!");
-            edt_Sdt.requestFocus();
-            return;
-        }
+            if (phone.length() > 12 || phone.length() < 9) {
+                edt_Sdt.setError("Số điện thoại phải từ 9 đến 12 ký tự!");
+                edt_Sdt.requestFocus();
+                return;
+            }
 
-        if (email.isEmpty()) {
-            edt_Email.setError("Vui lòng nhập email!");
-            edt_Email.requestFocus();
-            return;
-        }
+            if (email.isEmpty()) {
+                edt_Email.setError("Vui lòng nhập email!");
+                edt_Email.requestFocus();
+                return;
+            }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            edt_Email.setError("Email chưa hợp lệ!");
-            edt_Email.requestFocus();
-            return;
-        }
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                edt_Email.setError("Email chưa hợp lệ!");
+                edt_Email.requestFocus();
+                return;
+            }
 
-        if (password.isEmpty()) {
-            edt_Password.setError("Vui lòng nhập mật khẩu mới!");
-            edt_Password.requestFocus();
-            return;
-        }
+            if (password.isEmpty()) {
+                edt_Password.setError("Vui lòng nhập mật khẩu mới!");
+                edt_Password.requestFocus();
+                return;
+            }
 
-        if (password.length() < 6) {
-            edt_Password.setError("Mật khẩu phải hơn 6 ký tự!");
-            edt_Password.requestFocus();
-            return;
-        }
+            if (password.length() < 6) {
+                edt_Password.setError("Mật khẩu phải hơn 6 ký tự!");
+                edt_Password.requestFocus();
+                return;
+            }
 
-        if (confirmpassword.isEmpty()) {
-            edt_Nhaplaipassword.setError("Vui lòng nhập lại mật khẩu mới!");
-            edt_Nhaplaipassword.requestFocus();
-            return;
-        }
+            if (confirmpassword.isEmpty()) {
+                edt_Nhaplaipassword.setError("Vui lòng nhập lại mật khẩu mới!");
+                edt_Nhaplaipassword.requestFocus();
+                return;
+            }
 
-        if (!confirmpassword.equals(password)) {
-            edt_Nhaplaipassword.setError("Không trùng với mật khẩu mới!");
-            edt_Nhaplaipassword.requestFocus();
-            return;
-        }
+            if (!confirmpassword.equals(password)) {
+                edt_Nhaplaipassword.setError("Không trùng với mật khẩu mới!");
+                edt_Nhaplaipassword.requestFocus();
+                return;
+            }
 
         // Hiển thị ProgressDialog
         showProgressDialog();
