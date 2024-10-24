@@ -1,6 +1,7 @@
 package com.example.techwash.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.techwash.Model.News;
 import com.example.techwash.R;
+import com.example.techwash.UI.NewsDetailActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -38,7 +40,17 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         holder.title.setText(news.getTitle());
         holder.description.setText(news.getDescription());
         Picasso.get().load(news.getImageUrl()).into(holder.image);
+
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, NewsDetailActivity.class);
+            intent.putExtra("title", news.getTitle());
+            intent.putExtra("description", news.getDescription());
+            intent.putExtra("imageUrl", news.getImageUrl());
+            context.startActivity(intent);
+        });
     }
+
 
     @Override
     public int getItemCount() {
