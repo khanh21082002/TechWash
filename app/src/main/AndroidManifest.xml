@@ -52,26 +52,15 @@
             android:name=".UserProfile.ActivityUpdatePassword"
             android:exported="false"
             android:theme="@style/Theme.MaterialComponents.NoActionBar.Bridge" />
-<!--        <activity-->
-<!--            android:name=".UI.DetailHotelActivity"-->
-<!--            android:exported="true"-->
-<!--            android:theme="@style/Theme.MaterialComponents.NoActionBar.Bridge">-->
-
-<!--        </activity>-->
         <activity
             android:name=".UI.AutoDetailActivity"
             android:exported="true"
             android:theme="@style/Theme.MaterialComponents.NoActionBar.Bridge">
         </activity>
-
         <activity
             android:name=".UserProfile.EditProfilePage"
             android:exported="false"
             android:theme="@style/Theme.MaterialComponents.NoActionBar.Bridge" />
-<!--        <activity-->
-<!--            android:name=".UI.PaymentActivity"-->
-<!--            android:exported="false"-->
-<!--            android:theme="@style/Theme.MaterialComponents.NoActionBar.Bridge" />-->
         <activity
             android:name=".UI.MainScreen"
             android:exported="true"
@@ -86,7 +75,6 @@
             android:autofillHints="no"
             android:exported="true"
             android:theme="@style/Theme.MaterialComponents.NoActionBar.Bridge">
-
         </activity>
         <activity
             android:name=".Welcome"
@@ -97,12 +85,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-<!--        <activity-->
-<!--            android:name=".UI.DetailBookedActivity"-->
-<!--            android:exported="true"-->
-<!--            android:theme="@style/Theme.MaterialComponents.NoActionBar.Bridge">-->
 
-<!--        </activity>-->
+        <!-- Khai báo NewsDetailActivity -->
+        <activity
+            android:name=".UI.NewsDetailActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialComponents.NoActionBar.Bridge" />
 
         <uses-library
             android:name="org.apache.http.legacy"
